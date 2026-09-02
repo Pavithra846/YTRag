@@ -1,0 +1,7 @@
+{
+    "editor.inlineSuggest.edits.allowCodeShifting": "always",
+    "editor.acceptSuggestionOnCommitCharacter": false,
+    "chat.tools.terminal.autoApprove": {
+        "&": true
+    }
+}

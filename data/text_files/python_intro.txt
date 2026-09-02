@@ -1,0 +1,8 @@
+Python is a popular, high-level,
+    and interpreted programming language known for its clean syntax, readability, 
+    and versatility.Key Features of PythonEasy to Learn: Uses simple, English-like words
+    and indentation instead of brackets.Interpreted: Executes code line by line,
+    making it easy to test and debug.Cross-Platform: Runs on Windows, Mac,
+    and Linux without changing code.Large Libraries: Offers powerful built-in tools
+    and external packages for diverse tasks.Multi-Purpose: Used widely in web development,
+    data science, AI, and automation.

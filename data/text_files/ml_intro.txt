@@ -1,0 +1,11 @@
+Machine learning (ML) is a core branch of artificial 
+    intelligence focused on building systems that learn from data, identify patterns, 
+    and make decisions without explicit programming.
+    Key Aspects of Machine LearningDefinition: A subset of AI where computers use algorithms and 
+    statistical models to analyze data.Data-Driven: Systems improve automatically through
+     experience and by processing more input data.Core 
+     Types: Divided into supervised learning (labeled data),
+      unsupervised learning (hidden patterns), and reinforcement learning (trial and error).
+      Real-World Use: Powers everyday tools like email spam filters, recommendation engines,
+       and voice assistants.If you want, I can dive deeper into supervised vs. unsupervised learning
+        or list some popular ML algorithms like linear regression and decision trees.
