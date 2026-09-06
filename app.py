@@ -6,11 +6,18 @@ from src.chat_history import ChatHistory
 
 
 if __name__ == "__main__":
-    #docs = Load_all_documents("data")
+    
     store = Faissvectorestore("faiss_store")
+    if store.exists():
+        store.load()
+    else:
+        print("[INFO] No vector store found. Building vector store...")
+        docs = Load_all_documents("data")
+        store.build_from_documents(docs)
+
+        
     chat_history = ChatHistory(max_messages=10)
-    #store.build_from_documents(docs)
-    store.load()
+    
     
     rag = RAGSearch(store, chat_history)
     while True:

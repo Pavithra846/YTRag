@@ -1,7 +1,7 @@
 from langchain_groq import ChatGroq
 import os
-
-
+from dotenv import load_dotenv
+load_dotenv()
 
 class RAGSearch:
     def __init__(self, Vectorstore,chat_history, persist_dir: str="faiss_store", embedding_model: str = "all-MiniLM-L6-v2", llm_model: str = "openai/gpt-oss-20b"):
@@ -17,10 +17,9 @@ class RAGSearch:
             self.vectorstore.build_from_documents(docs)
         else:
             self.vectorstore.load()
-        groq_api_key = "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"        
-        self.llm = ChatGroq(groq_api_key=groq_api_key, model_name=llm_model)
+        GROQ_API_KEY  = os.getenv("GROQ_API_KEY")    
+        self.llm = ChatGroq(groq_api_key=GROQ_API_KEY , model_name=llm_model)
         print(f"[INFO] Groq LLM initialized: {llm_model}")
-        self.llm = ChatGroq(groq_api_key = groq_api_key, model_name = llm_model)
 
     def Search_and_summarize(self, query: str, top_k =3):
         #reteriver the context

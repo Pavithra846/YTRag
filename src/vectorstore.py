@@ -22,7 +22,7 @@ class Faissvectorestore:
 
     def build_from_documents(self, documents: List[Any]):
         print(f"[INFO] Building vector store from {len(documents)} raw documents ... ")
-        emb_pipe = EmbeddingPipeline(model_name=self.embedding_model, chunk_size=self.chunk_size, chunk_overlap= self.chunk_overlap)
+        emb_pipe = EmbeddingPipeline(model=self.model, chunk_size=self.chunk_size, chunk_overlap= self.chunk_overlap)
         chunks = emb_pipe.chunk_documents(documents)
         embeddings = emb_pipe.embed_chunks(chunks)
         metadatas = [
@@ -84,19 +84,8 @@ class Faissvectorestore:
         query_emb = self.model.encode([query_text]).astype('float32')
         return self.search(query_emb, top_k=top_k)
 
-    def _initialize_store(self):
-        try:
-            #create persistent chromaDB client
-            os.makedirs(self.persist_directory, exist_ok=True) 
-            self.client = chromadb.PersistentClient(path=self.persist_directory)
-            #set or create a collection
-            self.collection = self.client.get_or_create_collection(
-                name = self.collection_name,
-                metadata={"description": "pdf documents embeddings for RAG"}
-            )
-            print(f"[INFO] vector store initialized. collection:{self.collection_name}")
-            print(f"[DEBUG] Existing documents in collection:{self.collection.count()}")
-        
-        except Exception as e:
-            print(f"Error initializing vector store: {e}")
-            raise
+    def exists(self):
+        faiss_path = os.path.join(self.persist_dir, "faiss.index")
+        meta_path = os.path.join(self.persist_dir, "metadata.pkl")
+
+        return os.path.exists(faiss_path) and os.path.exists(meta_path)
