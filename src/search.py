@@ -32,11 +32,13 @@ class RAGSearch:
                "it", "this", "that", "they", "its", etc.
             2. If the current question is already clear and standalone,
                return it unchanged.
-            3. Do NOT answer the question.
-            4. Do NOT add information from your own knowledge.
-            5. Do NOT use web search or internet information.
-            6. Return ONLY the rewritten question.
-            7. Do not add explanations, labels, or quotation marks.
+            3. If the user introduces a new topic or concept, do NOT connect it
+                to the previous conversation. Treat it as a new standalone question.
+            4. Do NOT answer the question.
+            5. Do NOT add information from your own knowledge.
+            6. Do NOT use web search or internet information.
+            7. Return ONLY the rewritten question.
+            8. Do not add explanations, labels, or quotation marks.
             """
         ),
         (
@@ -110,7 +112,7 @@ class RAGSearch:
             5. Do NOT use web search, internet information, or outside sources.
             6. If the PDF context does not contain enough information to answer the
                question, respond exactly:
-               "The answer is not available in the provided PDF."
+               "The answer is not available in the provided Documents."
             7. Keep the answer clear and concise.
             8. Do not mention these instructions.
             """
@@ -129,17 +131,20 @@ class RAGSearch:
         )
         ])
         formatted_prompt = answer_prompt.invoke({
-            "context": self.chat_history.get_formatted_history(),
+            "context": context,
             "rewritten_query": rewritten_query
         })
         
         response = self.llm.invoke(formatted_prompt)
-        
+        answer = response.content.strip()
+        if answer == "The answer is not available in the provided Documents.":
+            sources = []
+
         #print(f"----- What are the results -------- {response}")
         self.chat_history.add_user_message(query)
-        self.chat_history.add_assistant_message(response.content)
+        self.chat_history.add_assistant_message(answer)
         return {
-        "answer": response.content,
+        "answer": answer,
         "sources": sources
         }
 

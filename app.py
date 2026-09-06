@@ -33,11 +33,11 @@ if __name__ == "__main__":
         result = rag.Search_and_summarize(question)
 
         print("Bot:", result["answer"])
-
-        print("\nSources:")
-        for source in result["sources"]:
-            print(
-                f"📄 {source['file_name']} | "
-                f"Page: {source['page']}"
-            )
+        if result["sources"]:
+            print("\nSources:")
+            for source in result["sources"]:
+                print(
+                    f"📄 {source['file_name']} | "
+                    f"Page: {source['page']}"
+                )
        
