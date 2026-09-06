@@ -1,6 +1,4 @@
 import pickle
-
-import chromadb
 import os
 from typing import List, Any
 import faiss
@@ -33,13 +31,22 @@ class Faissvectorestore:
         }
         for chunk in chunks
         ]
-
+        if len(embeddings) != len(metadatas):
+            raise ValueError(
+                f"Embedding count ({len(embeddings)}) does not match "
+                f"metadata count ({len(metadatas)})."
+            )
         self.add_embeddings(np.array(embeddings).astype('float32'), metadatas)
         self.save()
         print(f"[INFO] Vector store built and saved to {self.persist_dir}")
 
 
     def add_embeddings(self, embeddings: np.array, metadatas: List[Any]= None):
+        if len(embeddings) != len(metadatas):
+            raise ValueError(
+                f"Embedding count ({len(embeddings)}) does not match "
+                f"metadata count ({len(metadatas)})."
+            )
         dim = embeddings.shape[1]
         if self.index is None:
             self.index = faiss.IndexFlatL2(dim)

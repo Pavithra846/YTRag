@@ -13,6 +13,9 @@ if __name__ == "__main__":
     else:
         print("[INFO] No vector store found. Building vector store...")
         docs = Load_all_documents("data")
+        if not docs:
+            raise ValueError("No documents found in the data directory.")
+        
         store.build_from_documents(docs)
 
         

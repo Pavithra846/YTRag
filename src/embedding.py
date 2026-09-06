@@ -17,7 +17,7 @@ class EmbeddingPipeline:
         """
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
-        self.model = SentenceTransformer
+        self.model = model
         print(f"[INFO] Loading embedding model:{model}")
 
     def chunk_documents(self, documents: List[Any]) -> List[Any]:
