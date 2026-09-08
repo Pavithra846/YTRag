@@ -2,12 +2,15 @@ from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 import os
 from dotenv import load_dotenv
+from sentence_transformers import CrossEncoder
 load_dotenv()
 
 class RAGSearch:
     def __init__(self, Vectorstore, chat_history, llm_model: str = "openai/gpt-oss-20b"):
         self.vectorstore = Vectorstore
         self.chat_history = chat_history
+         # Load reranker 
+        self.reranker = CrossEncoder("BAAI/bge-reranker-base")
         GROQ_API_KEY  = os.getenv("GROQ_API_KEY")    
         if not GROQ_API_KEY:
             raise RuntimeError(
@@ -33,12 +36,24 @@ class RAGSearch:
             2. If the current question is already clear and standalone,
                return it unchanged.
             3. If the user introduces a new topic or concept, do NOT connect it
-                to the previous conversation. Treat it as a new standalone question.
-            4. Do NOT answer the question.
-            5. Do NOT add information from your own knowledge.
-            6. Do NOT use web search or internet information.
-            7. Return ONLY the rewritten question.
-            8. Do not add explanations, labels, or quotation marks.
+               to the previous conversation. Treat it as a new standalone question.
+
+            4. If a reference such as "it", "its", "this", "that", or "they"
+               has multiple possible meanings in the conversation, DO NOT GUESS.
+               Return the current question unchanged.
+
+            5. Only resolve a reference when the intended meaning is reasonably clear
+               from the conversation.
+
+            6. Do NOT answer the question.
+
+            7. Do NOT add information from your own knowledge.
+
+            8. Do NOT use web search or internet information.
+
+            9. Return ONLY the rewritten question.
+
+            10. Do not add explanations, labels, or quotation marks.
             """
         ),
         (
@@ -72,7 +87,7 @@ class RAGSearch:
             rewritten_query,
             top_k=top_k
         )
-
+        results = rerank(self, rewritten_query, results, top_k)
         print(f"[DEBUG] Retrieved chunk count: {len(results)}")
         
         texts = [r["metadata"].get("text", "") for r in results if r["metadata"]]
@@ -148,5 +163,23 @@ class RAGSearch:
         "sources": sources
         }
 
-    def new_chat(self):
-        self.chat_history.clear()
+
+def rerank(self, query, results, top_k=5):
+    candidate_k = max(top_k * 3, 10)
+    pairs = [
+        (query, result["metadata"]["text"])
+        for result in results
+    ]
+
+    scores = self.reranker.predict(pairs)
+
+    ranked = sorted(
+        zip(scores, results),
+        key=lambda x: x[0],
+        reverse=True
+    )
+
+    return [result for score, result in ranked[:top_k]]
+
+def new_chat(self):
+    self.chat_history.clear()

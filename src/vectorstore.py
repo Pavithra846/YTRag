@@ -7,12 +7,13 @@ from src.embedding import EmbeddingPipeline
 import numpy as np
 
 class Faissvectorestore:
-    def __init__(self, persist_dir: str="faiss_store", embedding_model: str = "all-MiniLM-L6-v2", chunk_size : int=1000, chunk_overlap: int= 200):
+    def __init__(self, persist_dir: str="faiss_store", embedding_model: str = "all-MiniLM-L6-v2", CrossEncoder_model: str = "cross-encoder/ms-marco-MiniLM-L-6-v2", chunk_size : int=1000, chunk_overlap: int= 200):
         self.persist_dir = persist_dir
         os.makedirs(self.persist_dir, exist_ok=True)
         self.index = None
         self.metadata = []
         self.embedding_model = embedding_model
+        self.CrossEncoder_model = CrossEncoder_model
         self.model = SentenceTransformer(embedding_model)
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
@@ -50,9 +51,19 @@ class Faissvectorestore:
         dim = embeddings.shape[1]
         if self.index is None:
             self.index = faiss.IndexFlatL2(dim)
+        elif self.index.d != dim:
+            raise ValueError(
+                f"Dimension mismatch! FAISS index expects {self.index.d} dimensions, "
+                f"but embeddings have {dim} dimensions."
+            )
         self.index.add(embeddings)
         if metadatas:
             self.metadata.extend(metadatas)
+        if self.index.ntotal != len(self.metadata):
+            raise ValueError(
+                f"Integrity check failed! Index total ({self.index.ntotal}) "
+                f"does not match metadata length ({len(self.metadata)})."
+            )
         print(f"[INFO] Added {embeddings.shape[0]} vectors to FAISS db index.")
 
     def save(self):
@@ -79,17 +90,21 @@ class Faissvectorestore:
     def search(self, query_embedding: np.ndarray, top_k: int = 5):
         print("self.index:", self.index)
         print("query_embedding shape:", query_embedding.shape)
+        
         D, I = self.index.search(query_embedding, top_k)
         results = []
         for idx, dist in zip(I[0], D[0]):
-            meta = self.metadata[idx] if idx < len(self.metadata) else None
-            results.append({"index": idx, "distance": dist, "metadata": meta})
+            # Prevent FAISS -1 sentinel value and out-of-bounds negative indexing
+            if idx != -1 and 0 <= idx < len(self.metadata):
+                meta = self.metadata[idx]
+                results.append({"index": int(idx), "distance": float(dist), "metadata": meta})
         return results
 
     def query(self, query_text: str, top_k: int = 5):
         print(f"[INFO] Querying vector store for: '{query_text}'")
         query_emb = self.model.encode([query_text]).astype('float32')
-        return self.search(query_emb, top_k=top_k)
+        candidate_k = max(top_k * 3, 10)
+        return self.search(query_emb, top_k=candidate_k)
 
     def exists(self):
         faiss_path = os.path.join(self.persist_dir, "faiss.index")
