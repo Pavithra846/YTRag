@@ -30,7 +30,7 @@ if __name__ == "__main__":
             print("Chat ended.")
             break
 
-        result = rag.Search_and_summarize(question, top_k=15)
+        result = rag.Search_and_summarize(question, top_k=3)
 
         print("Bot:", result["answer"])
         if result["sources"]:

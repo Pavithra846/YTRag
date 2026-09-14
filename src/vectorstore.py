@@ -2,8 +2,9 @@ import pickle
 import os
 from typing import List, Any
 import faiss
-from sentence_transformers import SentenceTransformer
+from sentence_transformers import SentenceTransformer, CrossEncoder
 from src.embedding import EmbeddingPipeline
+from src.reranker import Reranker
 import numpy as np
 
 class Faissvectorestore:
@@ -17,6 +18,8 @@ class Faissvectorestore:
         self.model = SentenceTransformer(embedding_model)
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
+        reranker_model = CrossEncoder("BAAI/bge-reranker-base")
+        self.reranker = Reranker(reranker_model)
         print(f"[INFO] Loaded embedding model: {embedding_model}")
 
     def build_from_documents(self, documents: List[Any]):
@@ -100,11 +103,28 @@ class Faissvectorestore:
                 results.append({"index": int(idx), "distance": float(dist), "metadata": meta})
         return results
 
-    def query(self, query_text: str, top_k: int = 5):
-        print(f"[INFO] Querying vector store for: '{query_text}'")
-        query_emb = self.model.encode([query_text]).astype('float32')
+    def query(self, question: str, top_k: int = 5):
+
+        print(f"[INFO] Querying vector store for: '{question}'")
+    
         candidate_k = max(top_k * 3, 10)
-        return self.search(query_emb, top_k=candidate_k)
+    
+        query_emb = self.model.encode(
+            [question]
+        ).astype("float32")
+    
+        results = self.search(
+            query_emb,
+            top_k=candidate_k
+        )
+    
+        reranked_results = self.reranker.rerank(
+            question,
+            results,
+            top_k=top_k
+        )
+    
+        return reranked_results
 
     def exists(self):
         faiss_path = os.path.join(self.persist_dir, "faiss.index")
