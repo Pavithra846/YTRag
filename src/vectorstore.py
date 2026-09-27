@@ -33,8 +33,10 @@ class Faissvectorestore:
             "page": chunk.metadata.get("page", 0) + 1,
             "file_name": chunk.metadata.get("source")
         }
+        
         for chunk in chunks
         ]
+        
         if len(embeddings) != len(metadatas):
             raise ValueError(
                 f"Embedding count ({len(embeddings)}) does not match "

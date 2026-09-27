@@ -23,21 +23,39 @@ if __name__ == "__main__":
     
     
     rag = RAGSearch(store, chat_history)
-    while True:
-        question = input("You: ")
+    test_questions = [
+"What is quantum computing?"
+"What is Docker?"
+"What is machine learning?"
+"What is the difference between Python and Java?"
+]
 
-        if question.lower() == "exit":
-            print("Chat ended.")
-            break
+    index = 0
 
-        result = rag.Search_and_summarize(question, top_k=3)
+    while index < len(test_questions):
 
-        print("Bot:", result["answer"])
+        question = test_questions[index]
+
+        print("\n" + "=" * 70)
+        print(f"TEST {index + 1}")
+        print(f"User: {question}")
+        print("=" * 70)
+
+        result = rag.Search_and_summarize(
+            question,
+            top_k=3
+        )
+
+        print("\nBot:")
+        print(result["answer"])
+
         if result["sources"]:
             print("\nSources:")
+
             for source in result["sources"]:
                 print(
                     f"📄 {source['file_name']} | "
                     f"Page: {source['page']}"
                 )
-       
+
+        index += 1
