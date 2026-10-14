@@ -1,0 +1,7 @@
+| Project_ID | Project_Name          | Technology    | Status      | Team        |
+| ---------- | --------------------- | ------------- | ----------- | ----------- |
+| P001       | Chatbot               | Python        | Completed   | AI Team     |
+| P002       | Recommendation Engine | Python        | In Progress | Data Team   |
+| P003       | Document Analyzer     | RAG           | Testing     | AI Team     |
+| P004       | Image Classifier      | Deep Learning | Completed   | Vision Team |
+| P005       | Voice Assistant       | NLP           | Planning    | AI Team     |

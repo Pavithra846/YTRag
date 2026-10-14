@@ -127,7 +127,28 @@ class Faissvectorestore:
         )
     
         return reranked_results
-
+    def search_exact_term(self, term: str):
+        """
+        Search for an exact term in the text stored in metadata.pkl.
+        Used for questions like:
+        'Is Round Robin mentioned in the document?'
+        """
+    
+        term = term.strip().lower()
+        matches = []
+    
+        for idx, meta in enumerate(self.metadata):
+        
+            # Your metadata contains the chunk text
+            text = meta.get("text", "")
+    
+            if term in text.lower():
+                matches.append({
+                    "index": idx,
+                    "metadata": meta
+                })
+    
+        return matches
     def exists(self):
         faiss_path = os.path.join(self.persist_dir, "faiss.index")
         meta_path = os.path.join(self.persist_dir, "metadata.pkl")

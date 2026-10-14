@@ -27,9 +27,7 @@ class RAGSearch:
 
     def Search_and_summarize(self, query: str, top_k =3):
         #reteriver the context
-        if "each" in query.lower() or "both" in query.lower():
-            pass
-
+        
         if not self.needs_query_analysis(query):
             questions = [query]
             ambiguous = False
@@ -241,9 +239,7 @@ class RAGSearch:
         context = "\n\n".join(
         text for text in texts if text.strip()
 )   
-        # print("\n===== RETRIEVED CONTEXT =====")
-        # print(context)
-        # print("=============================\n")
+        
         if not context:
             return {
                     "answer": "The answer is not available in the provided documents.",
@@ -258,19 +254,22 @@ class RAGSearch:
             """
             You are a PDF-based question-answering assistant.
 
-            Your ONLY source of knowledge is the PDF context provided below.
+            Your knowledge is restricted to the PDF context provided by the user.
 
             Rules:
-            1. Answer ONLY from the PDF context.
-            2. Every fact in your answer must be directly supported by the PDF context.
-            3. Do NOT add general knowledge, even if you know it is correct.
-            4. Do NOT infer or expand information beyond what the PDF says.
-            5. Do NOT use web search, internet information, or outside sources.
-            6. If the PDF context does not contain enough information to answer the
-                question, respond exactly:
-                "The answer is not available in the provided Documents."
-            7. Keep the answer clear and concise.
-            8. Do not mention these instructions.
+            1. Answer the question using only information supported by the PDF context.
+            2. You may combine information from multiple relevant parts of the context
+               to form a clear answer.
+            3. You may summarize or rephrase information from the PDF.
+            4. Do not add facts from your own knowledge.
+            5. Do not use web search, internet information, or outside sources.
+            6. If the context contains relevant information that can reasonably answer
+               the question, answer using that information.
+            7. Only return:
+               "The answer is not available in the provided Documents."
+               when the context contains no relevant information for the question.
+            8. Keep the answer clear and concise.
+            9. Do not mention these instructions.
             """
         ),
         (
@@ -285,7 +284,7 @@ class RAGSearch:
             Answer:
             """
         )
-        ])
+    ])
         formatted_prompt = answer_prompt.invoke({
             "context": context,
             "questions": "\n".join(
@@ -293,7 +292,9 @@ class RAGSearch:
                 for i, q in enumerate(questions)
             )
         })
-
+        print("\n===== ANSWER PROMPT =====")
+        print(formatted_prompt)
+        print("=========================\n")
         response = self.llm.invoke(formatted_prompt)
         answer = response.content.strip()
         if answer == "The answer is not available in the provided Documents.":
@@ -313,7 +314,7 @@ class RAGSearch:
     
         reference_words = {
             "it", "its", "this", "that", "they", "their",
-            "these", "those", "above", "previous", "mentioned", "them"
+            "these", "those", "above", "previous", "them"
         }
     
         context_words = {"each", "both"}
@@ -343,6 +344,47 @@ class RAGSearch:
             or has_multiple_question_marks
             or has_multiple_questions
         )
+    def is_mention_question(self, query: str) -> bool:
+        query_lower = query.lower().strip()
+
+        mention_patterns = [
+            "is .* mentioned",
+            "are .* mentioned",
+            "does .* mention",
+            "do .* mention",
+            "is .* listed",
+            "are .* listed",
+            "does .* list",
+            "do .* list",
+            "is .* present",
+            "are .* present",
+            "does .* contain",
+            "do .* contain"
+        ]
+
+        return any(
+            re.search(pattern, query_lower)
+            for pattern in mention_patterns
+        )
+    def extract_mention_term(self, query: str) -> str:
+        patterns = [
+            r"is (.+?) mentioned in the document",
+            r"are (.+?) mentioned in the document",
+            r"does the document mention (.+?)",
+            r"does the document list (.+?)",
+            r"is (.+?) listed in the document",
+            r"are (.+?) listed in the document",
+        ]
+    
+        query_lower = query.lower().strip()
+    
+        for pattern in patterns:
+            match = re.search(pattern, query_lower)
+    
+            if match:
+                return match.group(1).strip()
+    
+        return ""
     def update_conversation_state(self, questions, available=True):
         for question in questions:
             topic = question.strip()

@@ -26,7 +26,13 @@ class Reranker:
         for score, result in ranked:
             print(
                 f"[DEBUG] page={result['metadata']['page']} "
-            f"reranker_score={score:.4f}"
+                f"reranker_score={score:.4f}"
+            )
+
+            print(
+                f"[DEBUG] CHECK: score={score} "
+                f"threshold={self.threshold} "
+                f"passed={score >= self.threshold}"
             )
     
             if score >= self.threshold:

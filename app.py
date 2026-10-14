@@ -24,10 +24,7 @@ if __name__ == "__main__":
     
     rag = RAGSearch(store, chat_history)
     test_questions = [
-"What is quantum computing?"
-"What is Docker?"
-"What is machine learning?"
-"What is the difference between Python and Java?"
+     "What example is given for FCFS?", "What are the execution steps in the FCFS example?", "Which scheduling algorithm is described as non-preemptive?", "What is the difference between preemptive and non-preemptive scheduling?", "Explain both FCFS and Round Robin.","What scheduling algorithms are listed in the document?", "Which scheduling algorithms are mentioned on page 6?", "Is Round Robin mentioned in the document?", "What does the document say about Round Robin?", "Explain FCFS scheduling."
 ]
 
     index = 0
@@ -40,11 +37,21 @@ if __name__ == "__main__":
         print(f"TEST {index + 1}")
         print(f"User: {question}")
         print("=" * 70)
-
-        result = rag.Search_and_summarize(
-            question,
-            top_k=3
-        )
+        if rag.is_mention_question(question):
+            print("[DEBUG] Mention question detected")
+            term = rag.extract_mention_term(question)
+            
+            result = {
+                    "answer": "Mention question detected",
+                    "sources": []
+                    }
+            
+        
+        else:
+            result = rag.Search_and_summarize(
+                question,
+                top_k=3
+            )
 
         print("\nBot:")
         print(result["answer"])

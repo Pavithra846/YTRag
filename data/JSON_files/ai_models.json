@@ -1,0 +1,22 @@
+{
+  "models": [
+    {
+      "name": "Linear Regression",
+      "category": "Machine Learning",
+      "learning_type": "Supervised",
+      "description": "Predicts a continuous numerical value from input features."
+    },
+    {
+      "name": "K-Means",
+      "category": "Machine Learning",
+      "learning_type": "Unsupervised",
+      "description": "Groups similar data points into clusters."
+    },
+    {
+      "name": "Decision Tree",
+      "category": "Machine Learning",
+      "learning_type": "Supervised",
+      "description": "Uses a tree-like structure of decisions to make predictions."
+    }
+  ]
+}

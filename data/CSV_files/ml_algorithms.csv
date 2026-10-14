@@ -1,0 +1,7 @@
+Algorithm,Type,Main_Use,Example
+Linear Regression,Supervised,Prediction,House price prediction
+Decision Tree,Supervised,Classification,Customer classification
+K-Means,Unsupervised,Clustering,Customer segmentation
+Random Forest,Supervised,Classification,Spam detection
+KNN,Supervised,Classification,Recommendation systems
+Q-Learning,Reinforcement,Decision making,Game playing
