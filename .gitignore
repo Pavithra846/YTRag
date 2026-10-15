@@ -5,6 +5,8 @@ build/
 dist/
 wheels/
 *.egg-info
+chat_data/*
+!chat_data/.gitkeep
 
 # Virtual environments
 .venv
