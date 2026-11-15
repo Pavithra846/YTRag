@@ -45,6 +45,10 @@ class Faissvectorestore:
         self.add_embeddings(np.array(embeddings).astype('float32'), metadatas)
         self.save()
         print(f"[INFO] Vector store built and saved to {self.persist_dir}")
+        print(f"[INFO] Vector store embeddings {embeddings}")
+        norms = np.linalg.norm(embeddings, axis=1)
+        print(norms[:5])
+        print(np.allclose(norms, 1.0, atol=1e-5))
 
 
     def add_embeddings(self, embeddings: np.array, metadatas: List[Any]= None):

@@ -303,6 +303,7 @@ class RAGSearch:
         #print(f"----- What are the results -------- {response}")
         self.chat_history.add_user_message(query)
         self.chat_history.add_assistant_message(answer)
+        self.chat_history.save_history() #Save each complete chat turn
         return {
         "answer": answer,
         "sources": sources

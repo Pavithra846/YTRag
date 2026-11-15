@@ -9,26 +9,26 @@ from pathlib import Path
 from typing import List, Any
 
 
-def Load_all_documents(data_dir : str) -> List[Any]:
+def Load_all_documents(file_paths: List[Path]) -> List[Any]:
     """
-    Load all supported  files from the directory and convert to LANGChain Supported structure
-    Supported: PDF, TXT, CSV, Excel, Word, JSON
+    Load only the selected files and convert them
+    into LangChain Document objects.
+
+    Supported: PDF, TXT, MD
     """
 
-    # Use Project root data folder
-    data_path = Path(data_dir).resolve()
-    print(f"[DEBUG] Data path: {data_path}")
     documents =[]
+    print(f"[DEBUG] Selected files: {len(file_paths)}")
+    
 
-    supported_files = []
+    for file_path in file_paths:
 
-    supported_files.extend(data_path.glob("**/*.pdf"))
-    supported_files.extend(data_path.glob("**/*.txt"))
-    supported_files.extend(data_path.glob("**/*.md"))
-    print(f"[DEBUG] Found {len(supported_files)} supported files")
+        file_path = Path(file_path).resolve()
 
-    for file_path in supported_files:
-        print(f"[DEBUG] Loading PDF:{file_path}")
+        if not file_path.exists():
+            print(f"[WARNING] File not found: {file_path}")
+            continue
+
         try:
             extension = file_path.suffix.lower()
 
@@ -48,25 +48,25 @@ def Load_all_documents(data_dir : str) -> List[Any]:
             else:
                 print(f"[WARNING] Unsupported file: {file_path}")
                 continue
+
             loaded = loader.load()
+
             print(
                 f"[DEBUG] Loaded {len(loaded)} documents "
                 f"from {file_path.name}"
             )
-             # Add source metadata
+
             for document in loaded:
                 document.metadata["source"] = file_path.name
                 document.metadata["file_type"] = extension
+                document.metadata["file_name"] = file_path.name
+
             documents.extend(loaded)
+
         except Exception as e:
-            print(
-                f"[ERROR] Failed to load "
-                f"{file_path}: {e}"
-            )
-        
-    print(
-        f"[DEBUG] Total documents loaded: "
-        f"{len(documents)}"
-    )
+            print(f"[ERROR] Failed to load {file_path}: {e}")
+            raise RuntimeError(f"Failed to load document: {file_path}") from e
+
+    print(f"[DEBUG] Total documents loaded: {len(documents)}")
 
     return documents
