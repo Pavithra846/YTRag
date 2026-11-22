@@ -1,4 +1,3 @@
-from src.data_loader import Load_all_documents
 from src.chat_service import ChatService
 from pathlib import Path
 
@@ -6,7 +5,7 @@ def run_demo():
     backend = ChatService()
     BASE_DIR = Path(__file__).resolve().parent
     choice = int(input("Please Enter your Input: \n New Chat(1), Existing Chat(2) "))
-    selected_files = []
+    
     match choice:
         case 1:
             chat_id = backend.create_chat()
@@ -53,7 +52,8 @@ def get_user_files():
 
     while True:
 
-        file_path = input("File path: ").strip()
+        file_path = input("File path: ").strip('""')
+        
 
         if file_path.lower() == "done":
             break

@@ -8,13 +8,12 @@ from src.reranker import Reranker
 import numpy as np
 
 class Faissvectorestore:
-    def __init__(self, persist_dir: str="faiss_store", embedding_model: str = "all-MiniLM-L6-v2", CrossEncoder_model: str = "cross-encoder/ms-marco-MiniLM-L-6-v2", chunk_size : int=1000, chunk_overlap: int= 200):
+    def __init__(self, persist_dir: str="faiss_store", embedding_model: str = "all-MiniLM-L6-v2", chunk_size : int=1000, chunk_overlap: int= 200):
         self.persist_dir = persist_dir
-        os.makedirs(self.persist_dir, exist_ok=True)
+        os.makedirs(persist_dir, exist_ok=True)
         self.index = None
         self.metadata = []
         self.embedding_model = embedding_model
-        self.CrossEncoder_model = CrossEncoder_model
         self.model = SentenceTransformer(embedding_model)
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap

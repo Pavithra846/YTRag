@@ -30,11 +30,7 @@ class ChatService:
         (chat_dir / "uploads").mkdir(parents=True)
         return chat_id
     
-    def _get_store(
-        self,
-        chat_id: str,
-        require_existing_index: bool = False,
-    ) -> Faissvectorestore:
+    def _get_store(self, chat_id: str, require_existing_index: bool = False,) -> Faissvectorestore:
         chat_id = self._normalize_chat_id(chat_id)
 
         if chat_id in self.stores:
