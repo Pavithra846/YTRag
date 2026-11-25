@@ -39,7 +39,7 @@ class ChatService:
             store_dir = self.storage_dir / chat_id / "faiss_store"
             store = Faissvectorestore(persist_dir=str(store_dir))
 
-            if store.exists():
+            if store_dir.exists():
                 store.load()
             elif require_existing_index:
                 raise FileNotFoundError(
@@ -87,7 +87,7 @@ class ChatService:
 
         return self.rags[chat_id].Search_and_summarize(question, top_k=3)
 
-    def upload_documents(self, chat_id: str,  uploaded_files: List[Path]):
+    def upload_documents(self, chat_id: str,  uploaded_files: list[tuple[Path, str]]):
 
         chat_id = self._normalize_chat_id(chat_id)
     
@@ -110,12 +110,12 @@ class ChatService:
         else:
             indexed_files = {}
 
-        new_files = []
+        new_files: list[tuple[Path, str]] = []
         new_records = {}
         pending_hashes = set()
         copied_files = []
 
-        for file_path in uploaded_files:
+        for file_path, original_filename in uploaded_files:
 
             file_path = Path(file_path)
 
@@ -124,7 +124,7 @@ class ChatService:
                 continue
 
             if file_path.suffix.lower() not in [".pdf", ".txt", ".md"]:
-                print(f"[WARNING] Unsupported file: {file_path.name}")
+                print(f"[WARNING] Unsupported file: {original_filename}")
                 continue
 
             # Calculate content hash
@@ -132,25 +132,22 @@ class ChatService:
 
             # Check whether identical content was already indexed
             if file_hash in indexed_files or file_hash in pending_hashes:
-                print(f"[INFO] Duplicate file skipped: {file_path.name}")
+                print(f"[INFO] Duplicate file skipped: {original_filename}")
                 continue
 
-            destination = upload_dir / file_path.name
-
-            if destination.exists():
-                if self.get_file_hash(destination) != file_hash:
-                    raise FileExistsError(
-                        f"A different file named {file_path.name} "
-                        f"already exists in this chat's uploads."
-                    )
+            destination = upload_dir / original_filename
+            counter = 1
+            while destination.exists():
+                destination = upload_dir / f"{file_path.stem}_{counter}{file_path.suffix}"
+                counter += 1
             else:
                 shutil.copy2(file_path, destination)
                 copied_files.append(destination)
 
-            new_files.append(destination)
+            new_files.append((destination, original_filename))
             new_records[file_hash] = {
                 "file_name": destination.name,
-                "original_name": file_path.name
+                "original_name": original_filename
             }
             pending_hashes.add(file_hash)
         if not new_files:

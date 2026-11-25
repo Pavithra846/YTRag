@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import List, Any
 
 
-def Load_all_documents(file_paths: List[Path]) -> List[Any]:
+def Load_all_documents(file_paths: list[tuple[Path, str]]) -> List[Any]:
     """
     Load only the selected files and convert them
     into LangChain Document objects.
@@ -21,7 +21,7 @@ def Load_all_documents(file_paths: List[Path]) -> List[Any]:
     print(f"[DEBUG] Selected files: {len(file_paths)}")
     
 
-    for file_path in file_paths:
+    for file_path, original_filename in file_paths:
 
         file_path = Path(file_path).resolve()
 
@@ -53,13 +53,13 @@ def Load_all_documents(file_paths: List[Path]) -> List[Any]:
 
             print(
                 f"[DEBUG] Loaded {len(loaded)} documents "
-                f"from {file_path.name}"
+                f"from {original_filename}"
             )
 
             for document in loaded:
-                document.metadata["source"] = file_path.name
+                document.metadata["source"] = original_filename
                 document.metadata["file_type"] = extension
-                document.metadata["file_name"] = file_path.name
+                document.metadata["file_name"] = original_filename
 
             documents.extend(loaded)
 

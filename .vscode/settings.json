@@ -3,5 +3,10 @@
     "editor.acceptSuggestionOnCommitCharacter": false,
     "chat.tools.terminal.autoApprove": {
         "&": true
-    }
+    },
+    // Python error checking
+    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.autoImportCompletions": true,
+    // Formatting
+    "editor.formatOnSave": true
 }
