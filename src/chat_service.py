@@ -39,7 +39,7 @@ class ChatService:
             store_dir = self.storage_dir / chat_id / "faiss_store"
             store = Faissvectorestore(persist_dir=str(store_dir))
 
-            if store_dir.exists():
+            if store.exists():
                 store.load()
             elif require_existing_index:
                 raise FileNotFoundError(
@@ -87,7 +87,9 @@ class ChatService:
 
         return self.rags[chat_id].Search_and_summarize(question, top_k=3)
 
-    def upload_documents(self, chat_id: str,  uploaded_files: list[tuple[Path, str]]):
+    def upload_documents(
+        self, chat_id: str, uploaded_files: list[tuple[Path, str]]
+    ) -> int:
 
         chat_id = self._normalize_chat_id(chat_id)
     
@@ -151,7 +153,7 @@ class ChatService:
             }
             pending_hashes.add(file_hash)
         if not new_files:
-            return "No new files to upload."
+            return 0
         
         try:
             # Load only newly uploaded files
@@ -179,7 +181,7 @@ class ChatService:
 
             raise
 
-        return f"Successfully indexed {len(new_files)} new files."
+        return len(new_files)
 
 
     def get_file_hash(self, file_path: Path) -> str:

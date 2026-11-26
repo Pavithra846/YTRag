@@ -25,6 +25,8 @@ class Faissvectorestore:
         print(f"[INFO] Building vector store from {len(documents)} raw documents ... ")
         emb_pipe = EmbeddingPipeline(model=self.model, chunk_size=self.chunk_size, chunk_overlap= self.chunk_overlap)
         chunks = emb_pipe.chunk_documents(documents)
+        if not chunks:
+            raise ValueError("No text chunks were generated from the provided documents.")
         embeddings = emb_pipe.embed_chunks(chunks)
         metadatas = [
         {
@@ -50,7 +52,19 @@ class Faissvectorestore:
         print(np.allclose(norms, 1.0, atol=1e-5))
 
 
-    def add_embeddings(self, embeddings: np.array, metadatas: List[Any]= None):
+    def add_embeddings(
+        self,
+        embeddings: np.ndarray,
+        metadatas: List[Any] | None = None,
+    ):
+        embeddings = np.asarray(embeddings, dtype=np.float32)
+        if embeddings.ndim != 2 or not embeddings.shape[0] or not embeddings.shape[1]:
+            raise ValueError(
+                f"Embeddings must be a non-empty 2D array; got shape {embeddings.shape}."
+            )
+        if metadatas is None:
+            metadatas = []
+
         if len(embeddings) != len(metadatas):
             raise ValueError(
                 f"Embedding count ({len(embeddings)}) does not match "
